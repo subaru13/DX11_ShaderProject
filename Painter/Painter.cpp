@@ -141,13 +141,295 @@ namespace detail
 	}
 }
 
+void PixelShader::set(ID3D11DeviceContext* immediateContext)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->PSSetShader(shader.Get(), nullptr, 0);
+}
+
+
+
+PipelineState::PipelineState(ID3D11Device* device)
+{
+	HRESULT hr;
+
+	D3D11_SAMPLER_DESC samplerDesc{};
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0;
+	samplerDesc.MaxAnisotropy = 16;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = device->CreateSamplerState(&samplerDesc, samplerStates[SamplerState::point].ReleaseAndGetAddressOf());
+	hrInspection(hr);
+
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	hr = device->CreateSamplerState(&samplerDesc, samplerStates[SamplerState::linear].GetAddressOf());
+	hrInspection(hr);
+
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	hr = device->CreateSamplerState(&samplerDesc, samplerStates[SamplerState::anisotropic].GetAddressOf());
+	hrInspection(hr);
+
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc{};
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilStates[DepthStencilState::common].GetAddressOf());
+	hrInspection(hr);
+
+	depthStencilDesc.DepthEnable = FALSE;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilStates[DepthStencilState::none].GetAddressOf());
+	hrInspection(hr);
+
+	D3D11_BLEND_DESC blendDesc{};
+	blendDesc.AlphaToCoverageEnable = FALSE;
+	blendDesc.IndependentBlendEnable = FALSE;
+	blendDesc.RenderTarget[0].BlendEnable = FALSE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	hr = device->CreateBlendState(&blendDesc, blendStates[BlendState::none].GetAddressOf());
+	hrInspection(hr);
+
+	blendDesc.AlphaToCoverageEnable = FALSE;
+	blendDesc.IndependentBlendEnable = FALSE;
+	blendDesc.RenderTarget[0].BlendEnable = TRUE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	hr = device->CreateBlendState(&blendDesc, blendStates[BlendState::alpha].GetAddressOf());
+	hrInspection(hr);
+
+	blendDesc.AlphaToCoverageEnable = FALSE;
+	blendDesc.IndependentBlendEnable = FALSE;
+	blendDesc.RenderTarget[0].BlendEnable = TRUE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA; //D3D11_BLEND_ONE D3D11_BLEND_SRC_ALPHA
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	hr = device->CreateBlendState(&blendDesc, blendStates[BlendState::add].GetAddressOf());
+	hrInspection(hr);
+
+	D3D11_RASTERIZER_DESC rasterizerDesc{};
+	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	rasterizerDesc.CullMode = D3D11_CULL_NONE;
+	rasterizerDesc.FrontCounterClockwise = TRUE;
+	rasterizerDesc.DepthBias = 0;
+	rasterizerDesc.DepthBiasClamp = 0;
+	rasterizerDesc.SlopeScaledDepthBias = 0;
+	rasterizerDesc.DepthClipEnable = FALSE;
+	rasterizerDesc.ScissorEnable = FALSE;
+	rasterizerDesc.MultisampleEnable = FALSE;
+	rasterizerDesc.AntialiasedLineEnable = FALSE;
+	hr = device->CreateRasterizerState(&rasterizerDesc, rasterizerStates[RasterizerState::solid].GetAddressOf());
+	hrInspection(hr);
+
+	rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
+	rasterizerDesc.CullMode = D3D11_CULL_NONE;
+	rasterizerDesc.AntialiasedLineEnable = TRUE;
+	hr = device->CreateRasterizerState(&rasterizerDesc, rasterizerStates[RasterizerState::wireframe].GetAddressOf());
+	hrInspection(hr);
+}
+
+void PipelineState::setDepthStencilState(
+	ID3D11DeviceContext* immediateContext,
+	DepthStencilState depthStencilState,
+	UINT stencil_ref)
+{
+	immediateContext->OMSetDepthStencilState(depthStencilStates[depthStencilState].Get(), stencil_ref);
+}
+
+void PipelineState::setSamplerStates(
+	ID3D11DeviceContext* immediateContext,
+	SamplerState samplerState,
+	UINT slot,
+	bool useVs,
+	bool usePs,
+	bool useDs,
+	bool useHs,
+	bool useGs)
+{
+	assert(immediateContext && "The context is invalid.");
+	if (useVs)immediateContext->VSSetSamplers(slot, 1, samplerStates[samplerState].GetAddressOf());
+	if (usePs)immediateContext->PSSetSamplers(slot, 1, samplerStates[samplerState].GetAddressOf());
+	if (useDs)immediateContext->DSSetSamplers(slot, 1, samplerStates[samplerState].GetAddressOf());
+	if (useHs)immediateContext->HSSetSamplers(slot, 1, samplerStates[samplerState].GetAddressOf());
+	if (useGs)immediateContext->GSSetSamplers(slot, 1, samplerStates[samplerState].GetAddressOf());
+}
+
+void PipelineState::setBlendState(
+	ID3D11DeviceContext* immediateContext,
+	BlendState blendState)
+{
+	immediateContext->OMSetBlendState(blendStates[blendState].Get(), NULL, 0xFFFFFFFF);
+}
+
+void PipelineState::setRasterizerState(
+	ID3D11DeviceContext* immediateContext,
+	RasterizerState rasterizerState)
+{
+	immediateContext->RSSetState(rasterizerStates[rasterizerState].Get());
+}
+
+void VertexShader::set(ID3D11DeviceContext* immediateContext)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->VSSetShader(shader.Get(), nullptr, 0);
+	immediateContext->IASetInputLayout(layout.Get());
+}
+
+void DomainShader::set(ID3D11DeviceContext* immediateContext)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->DSSetShader(shader.Get(), nullptr, 0);
+}
+
+void HullShader::set(ID3D11DeviceContext* immediateContext)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->HSSetShader(shader.Get(), nullptr, 0);
+}
+
+void GeometryShader::set(ID3D11DeviceContext* immediateContext)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->GSSetShader(shader.Get(), nullptr, 0);
+}
+
+void ShaderResource::set(ID3D11DeviceContext* immediateContext, UINT slot, bool useVs, bool usePs, bool useDs, bool useHs, bool useGs)
+{
+	assert(immediateContext && "The context is invalid.");
+	if (useVs)immediateContext->VSSetShaderResources(slot, 1, resource.GetAddressOf());
+	if (usePs)immediateContext->PSSetShaderResources(slot, 1, resource.GetAddressOf());
+	if (useDs)immediateContext->DSSetShaderResources(slot, 1, resource.GetAddressOf());
+	if (useHs)immediateContext->HSSetShaderResources(slot, 1, resource.GetAddressOf());
+	if (useGs)immediateContext->GSSetShaderResources(slot, 1, resource.GetAddressOf());
+}
+
+void StructuredBuffer::updateSubresource(ID3D11DeviceContext* immediateContext, const void* data)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->UpdateSubresource(buffer.Get(), 0, 0, data, 0, 0);
+}
+
+void ConstantBuffer::updateSubresource(ID3D11DeviceContext* immediateContext, const void* data)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->UpdateSubresource(buffer.Get(), 0, 0, data, 0, 0);
+}
+
+void ConstantBuffer::set(ID3D11DeviceContext* immediateContext, UINT slot, bool useVs, bool usePs, bool useDs, bool useHs, bool useGs)
+{
+	assert(immediateContext && "The context is invalid.");
+	if (useVs)immediateContext->VSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
+	if (usePs)immediateContext->PSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
+	if (useDs)immediateContext->DSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
+	if (useHs)immediateContext->HSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
+	if (useGs)immediateContext->GSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
+}
+
+void RenderTexture::clear(ID3D11DeviceContext* immediateContext, float r, float g, float b, float a)
+{
+	assert(immediateContext && "The context is invalid.");
+	const FLOAT color[]{ r,g,b,a };
+	immediateContext->ClearRenderTargetView(view.Get(), color);
+}
+
+void DepthTexture::clear(ID3D11DeviceContext* immediateContext)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->ClearDepthStencilView(view.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+}
+
+void Layer::clear(ID3D11DeviceContext* immediateContext, float r, float g, float b, float a)
+{
+	assert(immediateContext && "The context is invalid.");
+	colorMap.clear(immediateContext, r, g, b, a);
+	depthMap.clear(immediateContext);
+}
+
+void Layer::switching(ID3D11DeviceContext* immediateContext)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->OMSetRenderTargets(1, colorMap.view.GetAddressOf(), depthMap.view.Get());
+	immediateContext->RSSetViewports(1, &viewport);
+}
+
+void VertexBuffer::set(ID3D11DeviceContext* immediateContext, UINT slot, UINT offset)
+{
+	immediateContext->IASetVertexBuffers(slot, 1, buffer.GetAddressOf(), &stride, &offset);
+}
+
+void IndexBuffer::set(ID3D11DeviceContext* immediateContext)
+{
+	immediateContext->IASetIndexBuffer(buffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+}
+
+void Mesh::set(ID3D11DeviceContext* immediateContext, UINT slot, UINT offset)
+{
+	if (vertexBuffer.buffer)
+	{
+		vertexBuffer.set(immediateContext, slot, offset);
+	}
+	if (indexBuffer.buffer)
+	{
+		indexBuffer.set(immediateContext);
+	}
+}
+
+void Painter::drawBegin(ID3D11DeviceContext* immediateContext)
+{
+	pushState(immediateContext);
+}
+
+void Painter::drawEnd(ID3D11DeviceContext* immediateContext)
+{
+	popState(immediateContext);
+}
+
+void Painter::pushState(ID3D11DeviceContext* immediateContext)
+{
+	cachedHandle.push(pushCachedComObjects(immediateContext));
+}
+
+void Painter::popState(ID3D11DeviceContext* immediateContext)
+{
+	if (cachedHandle.empty()) { return; }
+	popCachedComObjects(immediateContext, cachedHandle.top());
+	cachedHandle.pop();
+}
 
 void Geometry::set(ID3D11DeviceContext* immediateContext)
 {
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	immediateContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-	immediateContext->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	vertexBuffer.set(immediateContext, 0, 0);
+	indexBuffer.set(immediateContext);
 }
 
 void makeCube(ID3D11Device* device, Geometry* cube)
@@ -248,32 +530,8 @@ void makeCube(ID3D11Device* device, Geometry* cube)
 	indices[face * 6 + 4] = face * 4 + 2;
 	indices[face * 6 + 5] = face * 4 + 3;
 
-	cube->indexCount = 36;
-
-	D3D11_BUFFER_DESC desc = {};
-	D3D11_SUBRESOURCE_DATA data = {};
-
-	desc.ByteWidth = sizeof(Vertex) * 24;
-	desc.Usage = D3D11_USAGE_IMMUTABLE;
-	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	desc.CPUAccessFlags = 0;
-	desc.MiscFlags = 0;
-	desc.StructureByteStride = 0;
-	data.pSysMem = vertices;
-	data.SysMemPitch = 0;
-	data.SysMemSlicePitch = 0;
-	device->CreateBuffer(&desc, &data, cube->vertexBuffer.ReleaseAndGetAddressOf());
-
-	desc.ByteWidth = sizeof(UINT) * 36;
-	desc.Usage = D3D11_USAGE_IMMUTABLE;
-	desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	desc.CPUAccessFlags = 0;
-	desc.MiscFlags = 0;
-	desc.StructureByteStride = 0;
-	data.pSysMem = indices;
-	data.SysMemPitch = 0;
-	data.SysMemSlicePitch = 0;
-	device->CreateBuffer(&desc, &data, cube->indexBuffer.ReleaseAndGetAddressOf());
+	createVertexBuffer(device, &cube->vertexBuffer, sizeof(Vertex), 24, vertices);
+	createIndexBuffer(device, &cube->indexBuffer, 24, indices);
 }
 
 void makeSphere(ID3D11Device* device, Geometry* sphere, UINT slices, UINT stacks)
@@ -322,32 +580,8 @@ void makeSphere(ID3D11Device* device, Geometry* sphere, UINT slices, UINT stacks
 		}
 	}
 
-	sphere->indexCount = indicesSize;
-
-	D3D11_BUFFER_DESC desc = {};
-	D3D11_SUBRESOURCE_DATA data = {};
-
-	desc.ByteWidth = sizeof(Vertex) * verticesSize;
-	desc.Usage = D3D11_USAGE_IMMUTABLE;
-	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	desc.CPUAccessFlags = 0;
-	desc.MiscFlags = 0;
-	desc.StructureByteStride = 0;
-	data.pSysMem = vertices.data();
-	data.SysMemPitch = 0;
-	data.SysMemSlicePitch = 0;
-	device->CreateBuffer(&desc, &data, sphere->vertexBuffer.ReleaseAndGetAddressOf());
-
-	desc.ByteWidth = sizeof(UINT) * indicesSize;
-	desc.Usage = D3D11_USAGE_IMMUTABLE;
-	desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	desc.CPUAccessFlags = 0;
-	desc.MiscFlags = 0;
-	desc.StructureByteStride = 0;
-	data.pSysMem = indices.data();
-	data.SysMemPitch = 0;
-	data.SysMemSlicePitch = 0;
-	device->CreateBuffer(&desc, &data, sphere->indexBuffer.ReleaseAndGetAddressOf());
+	createVertexBuffer(device, &sphere->vertexBuffer, sizeof(Vertex), verticesSize, vertices.data());
+	createIndexBuffer(device, &sphere->indexBuffer, indicesSize, indices.data());
 }
 
 HRESULT loadPixelShader(ID3D11Device* device, PixelShader* outPs, const char* path)
@@ -519,9 +753,9 @@ HRESULT createConstantBuffer(ID3D11Device* device, ConstantBuffer* outCb, UINT e
 	HRESULT hr = S_OK;
 	if (initData)
 	{
-		D3D11_SUBRESOURCE_DATA _init_data{};
-		_init_data.pSysMem = initData;
-		hr = device->CreateBuffer(&desc, &_init_data, outCb->buffer.ReleaseAndGetAddressOf());
+		D3D11_SUBRESOURCE_DATA subresourceData{};
+		subresourceData.pSysMem = initData;
+		hr = device->CreateBuffer(&desc, &subresourceData, outCb->buffer.ReleaseAndGetAddressOf());
 	}
 	else
 	{
@@ -595,151 +829,41 @@ HRESULT createLayer(ID3D11Device* device, Layer* outLayer, UINT width, UINT heig
 	return hr;
 }
 
-PipelineState::PipelineState(ID3D11Device* device)
+HRESULT createVertexBuffer(ID3D11Device* device, VertexBuffer* outVertexBuffer, UINT stride, UINT count, const void* initialValue)
 {
-	HRESULT hr;
-
-	D3D11_SAMPLER_DESC samplerDesc{};
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.MipLODBias = 0;
-	samplerDesc.MaxAnisotropy = 16;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-	samplerDesc.BorderColor[0] = 0;
-	samplerDesc.BorderColor[1] = 0;
-	samplerDesc.BorderColor[2] = 0;
-	samplerDesc.BorderColor[3] = 0;
-	samplerDesc.MinLOD = 0;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	hr = device->CreateSamplerState(&samplerDesc, samplerStates[SamplerState::point].ReleaseAndGetAddressOf());
+	outVertexBuffer->stride = stride;
+	outVertexBuffer->count = count;
+	D3D11_BUFFER_DESC bufferDesc{};
+	bufferDesc.ByteWidth = stride * count;
+	bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.MiscFlags = 0;
+	bufferDesc.StructureByteStride = 0;
+	D3D11_SUBRESOURCE_DATA subresourceData{};
+	subresourceData.pSysMem = initialValue;
+	subresourceData.SysMemPitch = 0;
+	subresourceData.SysMemSlicePitch = 0;
+	HRESULT hr = device->CreateBuffer(&bufferDesc, &subresourceData, outVertexBuffer->buffer.ReleaseAndGetAddressOf());
 	hrInspection(hr);
-
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	hr = device->CreateSamplerState(&samplerDesc, samplerStates[SamplerState::linear].GetAddressOf());
-	hrInspection(hr);
-
-	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	hr = device->CreateSamplerState(&samplerDesc, samplerStates[SamplerState::anisotropic].GetAddressOf());
-	hrInspection(hr);
-
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc{};
-	depthStencilDesc.DepthEnable = TRUE;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-	hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilStates[DepthStencilState::common].GetAddressOf());
-	hrInspection(hr);
-
-	depthStencilDesc.DepthEnable = FALSE;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-	hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilStates[DepthStencilState::none].GetAddressOf());
-	hrInspection(hr);
-
-	D3D11_BLEND_DESC blendDesc{};
-	blendDesc.AlphaToCoverageEnable = FALSE;
-	blendDesc.IndependentBlendEnable = FALSE;
-	blendDesc.RenderTarget[0].BlendEnable = FALSE;
-	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
-	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	hr = device->CreateBlendState(&blendDesc, blendStates[BlendState::none].GetAddressOf());
-	hrInspection(hr);
-
-	blendDesc.AlphaToCoverageEnable = FALSE;
-	blendDesc.IndependentBlendEnable = FALSE;
-	blendDesc.RenderTarget[0].BlendEnable = TRUE;
-	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	hr = device->CreateBlendState(&blendDesc, blendStates[BlendState::alpha].GetAddressOf());
-	hrInspection(hr);
-
-	blendDesc.AlphaToCoverageEnable = FALSE;
-	blendDesc.IndependentBlendEnable = FALSE;
-	blendDesc.RenderTarget[0].BlendEnable = TRUE;
-	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA; //D3D11_BLEND_ONE D3D11_BLEND_SRC_ALPHA
-	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	hr = device->CreateBlendState(&blendDesc, blendStates[BlendState::add].GetAddressOf());
-	hrInspection(hr);
-
-	D3D11_RASTERIZER_DESC rasterizerDesc{};
-	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
-	rasterizerDesc.CullMode = D3D11_CULL_NONE;
-	rasterizerDesc.FrontCounterClockwise = TRUE;
-	rasterizerDesc.DepthBias = 0;
-	rasterizerDesc.DepthBiasClamp = 0;
-	rasterizerDesc.SlopeScaledDepthBias = 0;
-	rasterizerDesc.DepthClipEnable = FALSE;
-	rasterizerDesc.ScissorEnable = FALSE;
-	rasterizerDesc.MultisampleEnable = FALSE;
-	rasterizerDesc.AntialiasedLineEnable = FALSE;
-	hr = device->CreateRasterizerState(&rasterizerDesc, rasterizerStates[RasterizerState::solid].GetAddressOf());
-	hrInspection(hr);
-
-	rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
-	rasterizerDesc.CullMode = D3D11_CULL_NONE;
-	rasterizerDesc.AntialiasedLineEnable = TRUE;
-	hr = device->CreateRasterizerState(&rasterizerDesc, rasterizerStates[RasterizerState::wireframe].GetAddressOf());
-	hrInspection(hr);
+	return hr;
 }
 
-void PipelineState::setDepthStencilState(
-	ID3D11DeviceContext* immediateContext,
-	DepthStencilState depthStencilState,
-	UINT stencil_ref)
+HRESULT createIndexBuffer(ID3D11Device* device, IndexBuffer* outIndexBuffer, UINT count, const UINT* initialValue)
 {
-	immediateContext->OMSetDepthStencilState(depthStencilStates[depthStencilState].Get(), stencil_ref);
-}
-
-void PipelineState::setSamplerStates(
-	ID3D11DeviceContext* immediateContext,
-	SamplerState samplerState,
-	UINT slot,
-	bool useVs,
-	bool usePs,
-	bool useDs,
-	bool useHs,
-	bool useGs)
-{
-	assert(immediateContext && "The context is invalid.");
-	if (useVs)immediateContext->VSSetSamplers(slot, 1, samplerStates[samplerState].GetAddressOf());
-	if (usePs)immediateContext->PSSetSamplers(slot, 1, samplerStates[samplerState].GetAddressOf());
-	if (useDs)immediateContext->DSSetSamplers(slot, 1, samplerStates[samplerState].GetAddressOf());
-	if (useHs)immediateContext->HSSetSamplers(slot, 1, samplerStates[samplerState].GetAddressOf());
-	if (useGs)immediateContext->GSSetSamplers(slot, 1, samplerStates[samplerState].GetAddressOf());
-}
-
-void PipelineState::setBlendState(
-	ID3D11DeviceContext* immediateContext,
-	BlendState blendState)
-{
-	immediateContext->OMSetBlendState(blendStates[blendState].Get(), NULL, 0xFFFFFFFF);
-}
-
-void PipelineState::setRasterizerState(
-	ID3D11DeviceContext* immediateContext,
-	RasterizerState rasterizerState)
-{
-	immediateContext->RSSetState(rasterizerStates[rasterizerState].Get());
+	outIndexBuffer->count = count;
+	D3D11_BUFFER_DESC bufferDesc{};
+	bufferDesc.ByteWidth = sizeof(UINT) * count;
+	bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.MiscFlags = 0;
+	bufferDesc.StructureByteStride = 0;
+	D3D11_SUBRESOURCE_DATA subresourceData{};
+	subresourceData.pSysMem = initialValue;
+	subresourceData.SysMemPitch = 0;
+	subresourceData.SysMemSlicePitch = 0;
+	HRESULT hr = device->CreateBuffer(&bufferDesc, &subresourceData, outIndexBuffer->buffer.ReleaseAndGetAddressOf());
+	hrInspection(hr);
+	return hr;
 }

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <d3d11.h>
 #include <memory>
 #include <assert.h>
@@ -115,11 +115,10 @@ public:
 	friend inline void popCachedComObjects(ID3D11DeviceContext* immediateContext, Handle& handle)
 	{
 		assert(immediateContext && "The context is invalid.");
-		CachedComObjects* data = handle.release();
-		if (data)
+		if (handle)
 		{
-			data->pop(immediateContext);
-			delete data;
+			handle->pop(immediateContext);
+			handle.reset();
 		}
 	}
 };

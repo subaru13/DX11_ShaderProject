@@ -60,7 +60,6 @@ int WINAPI WinMain(
 			guiNewFrame();
 			KeyManager::instance()->update();
 			Mouse::instance()->update(system.hwnd);
-			//cameraControl.update(1.0f / 60.0f);
 
 			if (ImGui::Begin("toonShader"))
 			{

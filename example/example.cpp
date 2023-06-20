@@ -1,4 +1,4 @@
-#include "example.h"
+﻿#include "example.h"
 #include <string>
 
 class AudioResource
@@ -155,7 +155,7 @@ void DestructionPainter::draw(ID3D11DeviceContext* immediateContext, Geometry* g
 	constantBuffer.updateSubresource(immediateContext, &data);
 	constantBuffer.set(immediateContext, 0, true, true, true, true, true);
 	geometry->set(immediateContext);
-	immediateContext->DrawIndexed(geometry->indexCount, 0, 0);
+	immediateContext->DrawIndexed(geometry->indexBuffer.count, 0, 0);
 }
 
 ToonPainter::ToonPainter(ID3D11Device* device)
@@ -181,5 +181,5 @@ void ToonPainter::draw(ID3D11DeviceContext* immediateContext, Geometry* geometry
 	constantBuffer.updateSubresource(immediateContext, &data);
 	constantBuffer.set(immediateContext, 0, true, true, true, true, true);
 	geometry->set(immediateContext);
-	immediateContext->DrawIndexed(geometry->indexCount, 0, 0);
+	immediateContext->DrawIndexed(geometry->indexBuffer.count, 0, 0);
 }
