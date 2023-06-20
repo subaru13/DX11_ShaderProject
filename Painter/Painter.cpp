@@ -147,7 +147,117 @@ void PixelShader::set(ID3D11DeviceContext* immediateContext)
 	immediateContext->PSSetShader(shader.Get(), nullptr, 0);
 }
 
+void VertexShader::set(ID3D11DeviceContext* immediateContext)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->VSSetShader(shader.Get(), nullptr, 0);
+	immediateContext->IASetInputLayout(layout.Get());
+}
 
+void DomainShader::set(ID3D11DeviceContext* immediateContext)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->DSSetShader(shader.Get(), nullptr, 0);
+}
+
+void HullShader::set(ID3D11DeviceContext* immediateContext)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->HSSetShader(shader.Get(), nullptr, 0);
+}
+
+void GeometryShader::set(ID3D11DeviceContext* immediateContext)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->GSSetShader(shader.Get(), nullptr, 0);
+}
+
+void ShaderResource::set(ID3D11DeviceContext* immediateContext, UINT slot, bool useVs, bool usePs, bool useDs, bool useHs, bool useGs)
+{
+	assert(immediateContext && "The context is invalid.");
+	if (useVs)immediateContext->VSSetShaderResources(slot, 1, resource.GetAddressOf());
+	if (usePs)immediateContext->PSSetShaderResources(slot, 1, resource.GetAddressOf());
+	if (useDs)immediateContext->DSSetShaderResources(slot, 1, resource.GetAddressOf());
+	if (useHs)immediateContext->HSSetShaderResources(slot, 1, resource.GetAddressOf());
+	if (useGs)immediateContext->GSSetShaderResources(slot, 1, resource.GetAddressOf());
+}
+
+void StructuredBuffer::updateSubresource(ID3D11DeviceContext* immediateContext, const void* data)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->UpdateSubresource(buffer.Get(), 0, 0, data, 0, 0);
+}
+
+void ConstantBuffer::updateSubresource(ID3D11DeviceContext* immediateContext, const void* data)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->UpdateSubresource(buffer.Get(), 0, 0, data, 0, 0);
+}
+
+void ConstantBuffer::set(ID3D11DeviceContext* immediateContext, UINT slot, bool useVs, bool usePs, bool useDs, bool useHs, bool useGs)
+{
+	assert(immediateContext && "The context is invalid.");
+	if (useVs)immediateContext->VSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
+	if (usePs)immediateContext->PSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
+	if (useDs)immediateContext->DSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
+	if (useHs)immediateContext->HSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
+	if (useGs)immediateContext->GSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
+}
+
+void RenderTexture::clear(ID3D11DeviceContext* immediateContext, float r, float g, float b, float a)
+{
+	assert(immediateContext && "The context is invalid.");
+	const FLOAT color[]{ r,g,b,a };
+	immediateContext->ClearRenderTargetView(view.Get(), color);
+}
+
+void DepthTexture::clear(ID3D11DeviceContext* immediateContext)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->ClearDepthStencilView(view.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+}
+
+void Layer::clear(ID3D11DeviceContext* immediateContext, float r, float g, float b, float a)
+{
+	assert(immediateContext && "The context is invalid.");
+	colorMap.clear(immediateContext, r, g, b, a);
+	depthMap.clear(immediateContext);
+}
+
+void Layer::switching(ID3D11DeviceContext* immediateContext)
+{
+	assert(immediateContext && "The context is invalid.");
+	immediateContext->OMSetRenderTargets(1, colorMap.view.GetAddressOf(), depthMap.view.Get());
+	immediateContext->RSSetViewports(1, &viewport);
+}
+
+void VertexBuffer::set(ID3D11DeviceContext* immediateContext, UINT slot, UINT offset)
+{
+	immediateContext->IASetVertexBuffers(slot, 1, buffer.GetAddressOf(), &stride, &offset);
+}
+
+void IndexBuffer::set(ID3D11DeviceContext* immediateContext)
+{
+	immediateContext->IASetIndexBuffer(buffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+}
+
+void Mesh::set(ID3D11DeviceContext* immediateContext, UINT slot, UINT offset)
+{
+	if (vertexBuffer.buffer)
+	{
+		vertexBuffer.set(immediateContext, slot, offset);
+	}
+	if (indexBuffer.buffer)
+	{
+		indexBuffer.set(immediateContext);
+	}
+}
+
+void Geometry::set(ID3D11DeviceContext* immediateContext)
+{
+	vertexBuffer.set(immediateContext, 0, 0);
+	indexBuffer.set(immediateContext);
+}
 
 PipelineState::PipelineState(ID3D11Device* device)
 {
@@ -298,112 +408,6 @@ void PipelineState::setRasterizerState(
 	immediateContext->RSSetState(rasterizerStates[rasterizerState].Get());
 }
 
-void VertexShader::set(ID3D11DeviceContext* immediateContext)
-{
-	assert(immediateContext && "The context is invalid.");
-	immediateContext->VSSetShader(shader.Get(), nullptr, 0);
-	immediateContext->IASetInputLayout(layout.Get());
-}
-
-void DomainShader::set(ID3D11DeviceContext* immediateContext)
-{
-	assert(immediateContext && "The context is invalid.");
-	immediateContext->DSSetShader(shader.Get(), nullptr, 0);
-}
-
-void HullShader::set(ID3D11DeviceContext* immediateContext)
-{
-	assert(immediateContext && "The context is invalid.");
-	immediateContext->HSSetShader(shader.Get(), nullptr, 0);
-}
-
-void GeometryShader::set(ID3D11DeviceContext* immediateContext)
-{
-	assert(immediateContext && "The context is invalid.");
-	immediateContext->GSSetShader(shader.Get(), nullptr, 0);
-}
-
-void ShaderResource::set(ID3D11DeviceContext* immediateContext, UINT slot, bool useVs, bool usePs, bool useDs, bool useHs, bool useGs)
-{
-	assert(immediateContext && "The context is invalid.");
-	if (useVs)immediateContext->VSSetShaderResources(slot, 1, resource.GetAddressOf());
-	if (usePs)immediateContext->PSSetShaderResources(slot, 1, resource.GetAddressOf());
-	if (useDs)immediateContext->DSSetShaderResources(slot, 1, resource.GetAddressOf());
-	if (useHs)immediateContext->HSSetShaderResources(slot, 1, resource.GetAddressOf());
-	if (useGs)immediateContext->GSSetShaderResources(slot, 1, resource.GetAddressOf());
-}
-
-void StructuredBuffer::updateSubresource(ID3D11DeviceContext* immediateContext, const void* data)
-{
-	assert(immediateContext && "The context is invalid.");
-	immediateContext->UpdateSubresource(buffer.Get(), 0, 0, data, 0, 0);
-}
-
-void ConstantBuffer::updateSubresource(ID3D11DeviceContext* immediateContext, const void* data)
-{
-	assert(immediateContext && "The context is invalid.");
-	immediateContext->UpdateSubresource(buffer.Get(), 0, 0, data, 0, 0);
-}
-
-void ConstantBuffer::set(ID3D11DeviceContext* immediateContext, UINT slot, bool useVs, bool usePs, bool useDs, bool useHs, bool useGs)
-{
-	assert(immediateContext && "The context is invalid.");
-	if (useVs)immediateContext->VSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
-	if (usePs)immediateContext->PSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
-	if (useDs)immediateContext->DSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
-	if (useHs)immediateContext->HSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
-	if (useGs)immediateContext->GSSetConstantBuffers(slot, 1, buffer.GetAddressOf());
-}
-
-void RenderTexture::clear(ID3D11DeviceContext* immediateContext, float r, float g, float b, float a)
-{
-	assert(immediateContext && "The context is invalid.");
-	const FLOAT color[]{ r,g,b,a };
-	immediateContext->ClearRenderTargetView(view.Get(), color);
-}
-
-void DepthTexture::clear(ID3D11DeviceContext* immediateContext)
-{
-	assert(immediateContext && "The context is invalid.");
-	immediateContext->ClearDepthStencilView(view.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-}
-
-void Layer::clear(ID3D11DeviceContext* immediateContext, float r, float g, float b, float a)
-{
-	assert(immediateContext && "The context is invalid.");
-	colorMap.clear(immediateContext, r, g, b, a);
-	depthMap.clear(immediateContext);
-}
-
-void Layer::switching(ID3D11DeviceContext* immediateContext)
-{
-	assert(immediateContext && "The context is invalid.");
-	immediateContext->OMSetRenderTargets(1, colorMap.view.GetAddressOf(), depthMap.view.Get());
-	immediateContext->RSSetViewports(1, &viewport);
-}
-
-void VertexBuffer::set(ID3D11DeviceContext* immediateContext, UINT slot, UINT offset)
-{
-	immediateContext->IASetVertexBuffers(slot, 1, buffer.GetAddressOf(), &stride, &offset);
-}
-
-void IndexBuffer::set(ID3D11DeviceContext* immediateContext)
-{
-	immediateContext->IASetIndexBuffer(buffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-}
-
-void Mesh::set(ID3D11DeviceContext* immediateContext, UINT slot, UINT offset)
-{
-	if (vertexBuffer.buffer)
-	{
-		vertexBuffer.set(immediateContext, slot, offset);
-	}
-	if (indexBuffer.buffer)
-	{
-		indexBuffer.set(immediateContext);
-	}
-}
-
 void Painter::drawBegin(ID3D11DeviceContext* immediateContext)
 {
 	pushState(immediateContext);
@@ -416,20 +420,14 @@ void Painter::drawEnd(ID3D11DeviceContext* immediateContext)
 
 void Painter::pushState(ID3D11DeviceContext* immediateContext)
 {
-	cachedHandle.push(pushCachedComObjects(immediateContext));
+	cachedHandles.push(pushCachedComObjects(immediateContext));
 }
 
 void Painter::popState(ID3D11DeviceContext* immediateContext)
 {
-	if (cachedHandle.empty()) { return; }
-	popCachedComObjects(immediateContext, cachedHandle.top());
-	cachedHandle.pop();
-}
-
-void Geometry::set(ID3D11DeviceContext* immediateContext)
-{
-	vertexBuffer.set(immediateContext, 0, 0);
-	indexBuffer.set(immediateContext);
+	if (cachedHandles.empty()) { return; }
+	popCachedComObjects(immediateContext, cachedHandles.top());
+	cachedHandles.pop();
 }
 
 void makeCube(ID3D11Device* device, Geometry* cube)

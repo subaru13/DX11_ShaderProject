@@ -3,3 +3,4 @@ packages/
 imgui.ini
 .vs/
 x64/
+.json

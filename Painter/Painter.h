@@ -180,7 +180,7 @@ public:
 	virtual void drawBegin(ID3D11DeviceContext* immediateContext);
 	virtual void drawEnd(ID3D11DeviceContext* immediateContext);
 private:
-	std::stack<CachedHandle> cachedHandle;
+	std::stack<CachedHandle> cachedHandles;
 protected:
 	virtual void pushState(ID3D11DeviceContext* immediateContext)final;
 	virtual void popState(ID3D11DeviceContext* immediateContext)final;

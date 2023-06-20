@@ -7,6 +7,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <ScreenGrab.h>
+#include "func/CerealIO.h"
 #include "func/DX11System.h"
 #include "func/KeyInput.h"
 #include "func/CameraControl.h"
@@ -44,6 +45,8 @@ int WINAPI WinMain(
 	ToonPainter toonPainter{ system.d3d11Device.Get() };
 	toonPainter.data.world = matrixToFloat4x4(XMMatrixIdentity());
 
+	Deserialize(".json", toonPainter.data);
+
 	Float4 clearColor{ colorCodeToRGBA(0x4FB6FFFF) };
 
 	MSG msg{};
@@ -67,7 +70,14 @@ int WINAPI WinMain(
 				ImGui::DragFloat3("eyePos", (float*)cameraControl.getPos(), 0.01f);
 				if (ImGui::SliderFloat3("lightDir", &toonPainter.data.lightDir.x, -1.0f, 1.0f))
 				{
-					toonPainter.data.lightDir = vec3Normalize(toonPainter.data.lightDir);
+					if (XMVector3IsNaN(XMLoadFloat3(&toonPainter.data.lightDir)))
+					{
+						toonPainter.data.lightDir = Float3{ 0,-1.0f,0 };
+					}
+					else
+					{
+						toonPainter.data.lightDir = vec3Normalize(toonPainter.data.lightDir);
+					}
 				}
 				ImGui::ColorEdit4("matColor", &toonPainter.data.matColor.x);
 				ImGui::ColorEdit4("rimColor", &toonPainter.data.rimColor.x);
@@ -96,6 +106,7 @@ int WINAPI WinMain(
 			system.present();
 		}
 	}
+	Serialize(".json", toonPainter.data);
 
 	guiUninit();
 	UnregisterClass(L"Shader", instance);

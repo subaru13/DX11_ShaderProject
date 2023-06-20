@@ -1,4 +1,4 @@
-#ifndef INCLUDE_ARITHMETIC
+﻿#ifndef INCLUDE_ARITHMETIC
 #define INCLUDE_ARITHMETIC
 
 #include <math.h>

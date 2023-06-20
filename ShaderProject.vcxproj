@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="fanc\CerealIO.h" />
     <ClInclude Include="fanc\DX11System.h" />
     <ClInclude Include="func\Arithmetic.h" />
     <ClInclude Include="func\CameraControl.h" />
@@ -275,6 +276,7 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="packages\ImGui.Docking.1.88.1\build\native\imgui.docking.targets" Condition="Exists('packages\ImGui.Docking.1.88.1\build\native\imgui.docking.targets')" />
     <Import Project="packages\directxtk_uwp.2023.4.28.1\build\native\directxtk_uwp.targets" Condition="Exists('packages\directxtk_uwp.2023.4.28.1\build\native\directxtk_uwp.targets')" />
+    <Import Project="packages\cereal.1.0.0\build\native\cereal.targets" Condition="Exists('packages\cereal.1.0.0\build\native\cereal.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -282,5 +284,6 @@
     </PropertyGroup>
     <Error Condition="!Exists('packages\ImGui.Docking.1.88.1\build\native\imgui.docking.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\ImGui.Docking.1.88.1\build\native\imgui.docking.targets'))" />
     <Error Condition="!Exists('packages\directxtk_uwp.2023.4.28.1\build\native\directxtk_uwp.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\directxtk_uwp.2023.4.28.1\build\native\directxtk_uwp.targets'))" />
+    <Error Condition="!Exists('packages\cereal.1.0.0\build\native\cereal.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\cereal.1.0.0\build\native\cereal.targets'))" />
   </Target>
 </Project>
