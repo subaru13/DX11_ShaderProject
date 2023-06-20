@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ソース ファイル">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Painter">
+      <UniqueIdentifier>{f9c254cf-eb34-445e-8747-4243c58c82b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Painter\module">
+      <UniqueIdentifier>{76e9d66f-2035-4f7d-9755-44da4ec5144a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="example">
+      <UniqueIdentifier>{c4d14710-d306-4be9-a83e-6f3b5de1c9d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="example\shader">
+      <UniqueIdentifier>{eea338f0-eb81-48d4-bcf6-93e35b4d9fa3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="example\shader\WavePaint">
+      <UniqueIdentifier>{e4a98374-37b9-4cd3-8309-ea3361532c89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="example\shader\Destruction">
+      <UniqueIdentifier>{1f65a341-7631-49fb-b793-6df91930546f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Func">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{c81d448f-060d-486c-96d1-1f876da4fe62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="example\shader\Toon">
+      <UniqueIdentifier>{780fd667-bf3f-480b-8e7f-fdc7b6aa20fc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="fanc\DX11System.h">
+      <Filter>Func</Filter>
+    </ClInclude>
+    <ClInclude Include="Painter\CachedComObjects.h">
+      <Filter>Painter\module</Filter>
+    </ClInclude>
+    <ClInclude Include="Painter\Painter.h">
+      <Filter>Painter\module</Filter>
+    </ClInclude>
+    <ClInclude Include="example\example.h">
+      <Filter>example</Filter>
+    </ClInclude>
+    <ClInclude Include="func\Arithmetic.h">
+      <Filter>Func</Filter>
+    </ClInclude>
+    <ClInclude Include="func\CameraControl.h">
+      <Filter>Func</Filter>
+    </ClInclude>
+    <ClInclude Include="func\FrameworkConfig.h">
+      <Filter>Func</Filter>
+    </ClInclude>
+    <ClInclude Include="func\KeyInput.h">
+      <Filter>Func</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="WinMain.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Painter\Painter.cpp">
+      <Filter>Painter\module</Filter>
+    </ClCompile>
+    <ClCompile Include="example\example.cpp">
+      <Filter>example</Filter>
+    </ClCompile>
+    <ClCompile Include="func\CameraControl.cpp">
+      <Filter>Func</Filter>
+    </ClCompile>
+    <ClCompile Include="packages\ImGui.Docking.1.88.1\build\native\backends\imgui_impl_win32.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="packages\ImGui.Docking.1.88.1\build\native\backends\imgui_impl_dx11.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="example\WavePaint_vs.hlsl">
+      <Filter>example\shader\WavePaint</Filter>
+    </FxCompile>
+    <FxCompile Include="example\WavePaint_ps.hlsl">
+      <Filter>example\shader\WavePaint</Filter>
+    </FxCompile>
+    <FxCompile Include="example\Destruction_vs.hlsl">
+      <Filter>example\shader\Destruction</Filter>
+    </FxCompile>
+    <FxCompile Include="example\Destruction_ps.hlsl">
+      <Filter>example\shader\Destruction</Filter>
+    </FxCompile>
+    <FxCompile Include="example\Destruction_hs.hlsl">
+      <Filter>example\shader\Destruction</Filter>
+    </FxCompile>
+    <FxCompile Include="example\Destruction_ds.hlsl">
+      <Filter>example\shader\Destruction</Filter>
+    </FxCompile>
+    <FxCompile Include="example\Destruction_gs.hlsl">
+      <Filter>example\shader\Destruction</Filter>
+    </FxCompile>
+    <FxCompile Include="example\Toon_vs.hlsl">
+      <Filter>example\shader\Toon</Filter>
+    </FxCompile>
+    <FxCompile Include="example\Toon_ps.hlsl">
+      <Filter>example\shader\Toon</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="example\Destruction.hlsli">
+      <Filter>example\shader\Destruction</Filter>
+    </None>
+    <None Include="packages.config" />
+    <None Include="example\Toon.hlsli">
+      <Filter>example\shader\Toon</Filter>
+    </None>
+    <None Include=".editorconfig" />
+  </ItemGroup>
+</Project>
