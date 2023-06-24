@@ -2,25 +2,26 @@
 #pragma comment(lib,"ImGui.lib")
 #pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"winmm.lib")
-#include <Windows.h>
-#include <wincodec.h>
-#include <imgui.h>
-#include <imgui_internal.h>
-#include <ScreenGrab.h>
-#include "func/CerealIO.h"
-#include "func/DX11System.h"
-#include "func/KeyInput.h"
-#include "func/CameraControl.h"
-#include "example/example.h"
+#include "func/HighResolutionTimer.h"
+#include "include.h"
 
-#define TEST_WP 0
+#define CLASSNAME L"Shader"
 
 HWND winInit(HINSTANCE, int);
 
-void guiInit(DX11System*);
+void guiInit();
 void guiNewFrame();
 void guiRender();
 void guiUninit();
+void showLog();
+
+void init(DX11System*);
+void update(float);
+void draw(DX11System*);
+void uninit();
+
+DX11System* dx11System{};
+HighResolutionTimer highResolutionTimer{};
 
 int WINAPI WinMain(
 	_In_ HINSTANCE instance,
@@ -33,25 +34,15 @@ int WINAPI WinMain(
 #if defined(DEBUG) | defined(_DEBUG)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-	auto hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
-	DX11System system{ winInit(instance, cmdShow) };
-
-	guiInit(&system);
-
-	Geometry sphere{};
-	makeSphere(system.d3d11Device.Get(), &sphere, 32, 32);
-
-	CameraControl cameraControl{};
-	ToonPainter toonPainter{ system.d3d11Device.Get() };
-	toonPainter.data.world = matrixToFloat4x4(XMMatrixIdentity());
-
-	Deserialize(".json", toonPainter.data);
-
-	Float4 clearColor{ colorCodeToRGBA(0x4FB6FFFF) };
+	(void)CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+	dx11System = new DX11System(winInit(instance, cmdShow));
+	guiInit();
+	init(dx11System);
+	highResolutionTimer.Tick();
 
 	MSG msg{};
 
-	while (WM_QUIT != msg.message)
+	do
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -60,61 +51,29 @@ int WINAPI WinMain(
 		}
 		else
 		{
+			highResolutionTimer.Tick();
 			guiNewFrame();
 			KeyManager::instance()->update();
-			Mouse::instance()->update(system.hwnd);
-
-			if (ImGui::Begin("toonShader"))
-			{
-				ImGui::ColorEdit4("clearColor", &clearColor.x);
-				ImGui::DragFloat3("eyePos", (float*)cameraControl.getPos(), 0.01f);
-				if (ImGui::SliderFloat3("lightDir", &toonPainter.data.lightDir.x, -1.0f, 1.0f))
-				{
-					if (XMVector3IsNaN(XMLoadFloat3(&toonPainter.data.lightDir)))
-					{
-						toonPainter.data.lightDir = Float3{ 0,-1.0f,0 };
-					}
-					else
-					{
-						toonPainter.data.lightDir = vec3Normalize(toonPainter.data.lightDir);
-					}
-				}
-				ImGui::ColorEdit4("matColor", &toonPainter.data.matColor.x);
-				ImGui::ColorEdit4("rimColor", &toonPainter.data.rimColor.x);
-				if (ImGui::DragInt("toonLevels", &toonPainter.data.toonLevels))
-				{
-					toonPainter.data.toonLevels = max(toonPainter.data.toonLevels, 2);
-				}
-				if (ImGui::DragFloat("outlineThreshold", &toonPainter.data.outlineThreshold,0.01f))
-				{
-					toonPainter.data.outlineThreshold = min(max(toonPainter.data.outlineThreshold, 0.0f), 1.0f);
-				}
-			}
-			ImGui::End();
-			system.clearRenderTargets(&clearColor.x);
-
-
-			auto view = cameraControl.getView();
-			auto proj = cameraControl.getProjection();
-			toonPainter.data.viewProjection = matrixToFloat4x4(XMLoadFloat4x4(&view) * XMLoadFloat4x4(&proj));
-			std::memcpy(&toonPainter.data.eyePos, cameraControl.getPos(), sizeof(Float3));
-			toonPainter.drawBegin(system.d3d11DeviceContext.Get());
-			toonPainter.draw(system.d3d11DeviceContext.Get(), &sphere);
-			toonPainter.drawEnd(system.d3d11DeviceContext.Get());
-
+			Mouse::instance()->update(dx11System->hwnd);
+			dx11System->clearRenderTargets(nullptr);
+			update((float)highResolutionTimer.GetElapsedTime());
+			draw(dx11System);
+			showLog();
+			dx11System->setRenderTargets();
 			guiRender();
-			system.present();
+			dx11System->present();
 		}
-	}
-	Serialize(".json", toonPainter.data);
+	} while (WM_QUIT != msg.message);
 
+	uninit();
 	guiUninit();
-	UnregisterClass(L"Shader", instance);
+	delete dx11System;
+	UnregisterClass(CLASSNAME, instance);
 	CoUninitialize();
 	return static_cast<int>(msg.wParam);
 }
 
-extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wparam, LPARAM lparam);
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM, LPARAM);
 
 LRESULT CALLBACK handleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
@@ -149,11 +108,11 @@ HWND winInit(HINSTANCE instance, int cmdShow)
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;
-	wcex.lpszClassName = L"Shader";
+	wcex.lpszClassName = CLASSNAME;
 	wcex.hIconSm = NULL;
 	RegisterClassEx(&wcex);
 
-	RECT rc{ 0, 0, 1280, 720 };
+	RECT rc{ 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 	HWND hwnd = CreateWindowEx(0, wcex.lpszClassName, L"Shader",
 		WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX ^ WS_THICKFRAME | WS_VISIBLE,
@@ -166,16 +125,23 @@ HWND winInit(HINSTANCE instance, int cmdShow)
 
 #include <backends/imgui_impl_dx11.h>
 #include <backends/imgui_impl_win32.h>
+#include <vector>
 
-void guiInit(DX11System* system)
+#define LOG_COUNT 1024
+std::vector<std::string> imguiLog{};
+bool showLogConsoleOpen{ false };
+ImGuiWindowFlags logConsoleFrags{ 0 };
+
+void guiInit()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_::ImGuiConfigFlags_ViewportsEnable;
 	io.ConfigFlags |= ImGuiConfigFlags_::ImGuiConfigFlags_DockingEnable;
-	ImGui_ImplWin32_Init(system->hwnd);
-	ImGui_ImplDX11_Init(system->d3d11Device.Get(), system->d3d11DeviceContext.Get());
+	ImGui_ImplWin32_Init(dx11System->hwnd);
+	ImGui_ImplDX11_Init(dx11System->d3d11Device.Get(), dx11System->d3d11DeviceContext.Get());
+	imguiLog.reserve(LOG_COUNT);
 }
 
 void guiNewFrame()
@@ -187,6 +153,11 @@ void guiNewFrame()
 
 void guiRender()
 {
+	if (ImGui::BeginMainMenuBar())
+	{
+		ImGui::MenuItem("log console", nullptr, &showLogConsoleOpen);
+		ImGui::EndMainMenuBar();
+	}
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -201,4 +172,48 @@ void guiUninit()
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+}
+
+void debugLog(const char* fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	int temp = _vscprintf(fmt, args);
+	if (temp > 0)
+	{
+		std::string& newText = imguiLog.emplace_back();
+		size_t len = static_cast<size_t>(temp) + 1;
+		newText.resize(len);
+		_vsprintf_s_l(newText.data(), len, fmt, NULL, args);
+	}
+	va_end(args);
+}
+
+void showLog()
+{
+	if (!showLogConsoleOpen)return;
+	if (ImGui::Begin("log console", &showLogConsoleOpen, logConsoleFrags))
+	{
+		if (imguiLog.size() > LOG_COUNT)
+		{
+			size_t index = imguiLog.size() - LOG_COUNT;
+			imguiLog.erase(imguiLog.begin(), imguiLog.begin() + index);
+		}
+
+		if (ImGui::MenuItem("clear"))
+		{
+			imguiLog.clear();
+		}
+
+		ImGui::Text("%d/%d", imguiLog.size(), LOG_COUNT);
+		if (ImGui::BeginChild("log console child"))
+		{
+			for (auto it = imguiLog.rbegin(); it != imguiLog.rend(); ++it)
+			{
+				ImGui::Text(it->c_str());
+			}
+		}
+		ImGui::EndChild();
+	}
+	ImGui::End();
 }

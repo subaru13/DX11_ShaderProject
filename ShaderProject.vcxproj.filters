@@ -62,6 +62,12 @@
     <ClInclude Include="fanc\CerealIO.h">
       <Filter>Func</Filter>
     </ClInclude>
+    <ClInclude Include="include.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="func\HighResolutionTimer.h">
+      <Filter>Func</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -81,6 +87,15 @@
     </ClCompile>
     <ClCompile Include="packages\ImGui.Docking.1.88.1\build\native\backends\imgui_impl_dx11.cpp">
       <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="test000.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="packages\ImGui.Docking.1.88.1\build\native\misc\cpp\imgui_stdlib.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="func\HighResolutionTimer.cpp">
+      <Filter>Func</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

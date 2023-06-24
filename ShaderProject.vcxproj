@@ -24,7 +24,9 @@
     <ClInclude Include="func\Arithmetic.h" />
     <ClInclude Include="func\CameraControl.h" />
     <ClInclude Include="func\FrameworkConfig.h" />
+    <ClInclude Include="func\HighResolutionTimer.h" />
     <ClInclude Include="func\KeyInput.h" />
+    <ClInclude Include="include.h" />
     <ClInclude Include="Painter\CachedComObjects.h" />
     <ClInclude Include="example\example.h" />
     <ClInclude Include="Painter\Painter.h" />
@@ -32,9 +34,12 @@
   <ItemGroup>
     <ClCompile Include="example\example.cpp" />
     <ClCompile Include="func\CameraControl.cpp" />
+    <ClCompile Include="func\HighResolutionTimer.cpp" />
     <ClCompile Include="packages\ImGui.Docking.1.88.1\build\native\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="packages\ImGui.Docking.1.88.1\build\native\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="packages\ImGui.Docking.1.88.1\build\native\misc\cpp\imgui_stdlib.cpp" />
     <ClCompile Include="Painter\Painter.cpp" />
+    <ClCompile Include="test000.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -250,6 +255,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>

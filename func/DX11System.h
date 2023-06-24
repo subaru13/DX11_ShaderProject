@@ -97,15 +97,18 @@ public:
 		d3d11DeviceContext->RSSetViewports(1, &d3d11Viewport);
 	}
 
-	void clearRenderTargets(const float* clearColor)
+	void clearRenderTargets(const float* clearColor = nullptr)
 	{
 		static const FLOAT defClearColor[4]{ 0.0f,0.4f,0.4f,1.0f };
 		d3d11DeviceContext->ClearRenderTargetView(d3d11RenderTarget.Get(), clearColor ? clearColor : defClearColor);
 		d3d11DeviceContext->ClearDepthStencilView(d3d11DepthStencil.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	}
+
+	void setRenderTargets()
+	{
 		d3d11DeviceContext->OMSetRenderTargets(1, d3d11RenderTarget.GetAddressOf(), d3d11DepthStencil.Get());
 		d3d11DeviceContext->RSSetViewports(1, &d3d11Viewport);
 	}
-
 
 	void present()
 	{
