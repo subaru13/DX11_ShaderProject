@@ -4,7 +4,7 @@
 #include "func/CerealIO.h"
 #include "func/FrameworkConfig.h"
 #include "func/Arithmetic.h"
-#include "Painter/Painter.h"
+#include "painter/Painter.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <misc/cpp/imgui_stdlib.h>

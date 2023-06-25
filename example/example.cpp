@@ -120,10 +120,10 @@ void WavePainter::draw(ID3D11DeviceContext* immediateContext)
 
 void WavePainter::bake(ID3D11DeviceContext* immediateContext, Layer* layer)
 {
-	CachedHandle ch = pushCachedComObjects(immediateContext);
+	pushStates(immediateContext);
 	layer->switching(immediateContext);
 	draw(immediateContext);
-	popCachedComObjects(immediateContext, ch);
+	popStates(immediateContext);
 }
 
 DestructionPainter::DestructionPainter(ID3D11Device* device)

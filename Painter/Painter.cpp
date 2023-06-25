@@ -60,7 +60,8 @@ namespace detail
 		ID3D11Texture2D** texture2D,
 		UINT width, UINT height,
 		DXGI_FORMAT format,
-		UINT bindFlag)
+		UINT bindFlag,
+		const D3D11_SUBRESOURCE_DATA* subresourceData)
 	{
 		D3D11_TEXTURE2D_DESC desc;
 		ZeroMemory(&desc, sizeof(desc));
@@ -80,7 +81,7 @@ namespace detail
 			desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		}
 		desc.BindFlags = bindFlag;
-		return device->CreateTexture2D(&desc, nullptr, texture2D);
+		return device->CreateTexture2D(&desc, subresourceData, texture2D);
 	}
 
 	HRESULT createResource(ID3D11Device* device,
@@ -410,20 +411,20 @@ void PipelineState::setRasterizerState(
 
 void Painter::drawBegin(ID3D11DeviceContext* immediateContext)
 {
-	pushState(immediateContext);
+	pushStates(immediateContext);
 }
 
 void Painter::drawEnd(ID3D11DeviceContext* immediateContext)
 {
-	popState(immediateContext);
+	popStates(immediateContext);
 }
 
-void Painter::pushState(ID3D11DeviceContext* immediateContext)
+void Painter::pushStates(ID3D11DeviceContext* immediateContext)
 {
 	cachedHandles.push(pushCachedComObjects(immediateContext));
 }
 
-void Painter::popState(ID3D11DeviceContext* immediateContext)
+void Painter::popStates(ID3D11DeviceContext* immediateContext)
 {
 	if (cachedHandles.empty()) { return; }
 	popCachedComObjects(immediateContext, cachedHandles.top());
@@ -699,10 +700,30 @@ HRESULT loadGeometryShader(ID3D11Device* device, GeometryShader* outGs, const ch
 HRESULT loadShaderResource(ID3D11Device* device, ShaderResource* outSr, const wchar_t* path)
 {
 	assert(device && "The device is invalid.");
-	return DirectX::CreateWICTextureFromFile(device,
+	return CreateWICTextureFromFile(device,
 		path,
 		nullptr,
 		outSr->resource.ReleaseAndGetAddressOf());
+}
+
+HRESULT createShaderResource(ID3D11Device* device, ShaderResource* outSr)
+{
+	assert(device && "The device is invalid.");
+	HRESULT hr;
+	ID3D11Texture2D* texture2D;
+	D3D11_SUBRESOURCE_DATA subresourceData{};
+	DWORD colorCode{ 0xffffffff };
+	subresourceData.pSysMem = &colorCode;
+	subresourceData.SysMemPitch = sizeof(colorCode);
+	subresourceData.SysMemSlicePitch = 0;
+
+	hr = detail::createTexture2D(device, &texture2D, 1, 1, DXGI_FORMAT_R8G8B8A8_UNORM, D3D11_BIND_SHADER_RESOURCE, &subresourceData);
+	hrInspection(hr);
+
+	hr = detail::createResource(device, texture2D, outSr->resource.ReleaseAndGetAddressOf());
+	hrInspection(hr);
+	texture2D->Release();
+	return hr;
 }
 
 HRESULT createStructuredBuffer(ID3D11Device* device,
@@ -771,7 +792,7 @@ HRESULT createRenderTextrue(ID3D11Device* device,
 	assert(device && "The device is invalid.");
 	HRESULT hr;
 	ID3D11Texture2D* texture2D;
-	hr = detail::createTexture2D(device, &texture2D, width, height, format, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
+	hr = detail::createTexture2D(device, &texture2D, width, height, format, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE, nullptr);
 	hrInspection(hr);
 
 	hr = detail::createResource(device, texture2D, outRt->resource.ReleaseAndGetAddressOf());
@@ -792,7 +813,7 @@ HRESULT createDepthTextrue(ID3D11Device* device,
 	assert(device && "The device is invalid.");
 	HRESULT hr;
 	ID3D11Texture2D* texture2D;
-	hr = detail::createTexture2D(device, &texture2D, width, height, DXGI_FORMAT_R24G8_TYPELESS, D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE);
+	hr = detail::createTexture2D(device, &texture2D, width, height, DXGI_FORMAT_R24G8_TYPELESS, D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE, nullptr);
 	hrInspection(hr);
 
 	hr = detail::createResource(device, texture2D, outDt->resource.ReleaseAndGetAddressOf());

@@ -5,12 +5,6 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Painter">
-      <UniqueIdentifier>{f9c254cf-eb34-445e-8747-4243c58c82b1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Painter\module">
-      <UniqueIdentifier>{76e9d66f-2035-4f7d-9755-44da4ec5144a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="example">
       <UniqueIdentifier>{c4d14710-d306-4be9-a83e-6f3b5de1c9d5}</UniqueIdentifier>
     </Filter>
@@ -23,64 +17,82 @@
     <Filter Include="example\shader\Destruction">
       <UniqueIdentifier>{1f65a341-7631-49fb-b793-6df91930546f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Func">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="external">
       <UniqueIdentifier>{c81d448f-060d-486c-96d1-1f876da4fe62}</UniqueIdentifier>
     </Filter>
     <Filter Include="example\shader\Toon">
       <UniqueIdentifier>{780fd667-bf3f-480b-8e7f-fdc7b6aa20fc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="func">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="painter">
+      <UniqueIdentifier>{f9c254cf-eb34-445e-8747-4243c58c82b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="painter\module">
+      <UniqueIdentifier>{76e9d66f-2035-4f7d-9755-44da4ec5144a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="painter\shader">
+      <UniqueIdentifier>{81e1726c-d955-492e-9723-677c14e6cd93}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="fanc\DX11System.h">
-      <Filter>Func</Filter>
-    </ClInclude>
-    <ClInclude Include="Painter\CachedComObjects.h">
-      <Filter>Painter\module</Filter>
-    </ClInclude>
-    <ClInclude Include="Painter\Painter.h">
-      <Filter>Painter\module</Filter>
-    </ClInclude>
-    <ClInclude Include="example\example.h">
-      <Filter>example</Filter>
-    </ClInclude>
-    <ClInclude Include="func\Arithmetic.h">
-      <Filter>Func</Filter>
-    </ClInclude>
-    <ClInclude Include="func\CameraControl.h">
-      <Filter>Func</Filter>
-    </ClInclude>
-    <ClInclude Include="func\FrameworkConfig.h">
-      <Filter>Func</Filter>
-    </ClInclude>
-    <ClInclude Include="func\KeyInput.h">
-      <Filter>Func</Filter>
-    </ClInclude>
-    <ClInclude Include="fanc\CerealIO.h">
-      <Filter>Func</Filter>
-    </ClInclude>
-    <ClInclude Include="include.h">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="func\HighResolutionTimer.h">
-      <Filter>Func</Filter>
-    </ClInclude>
+    <FxCompile Include="painter\shader\Sprite_vs.hlsl">
+      <Filter>painter\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="painter\shader\Sprite_ps.hlsl">
+      <Filter>painter\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="example\shader\Destruction_gs.hlsl">
+      <Filter>example\shader\Destruction</Filter>
+    </FxCompile>
+    <FxCompile Include="example\shader\Destruction_hs.hlsl">
+      <Filter>example\shader\Destruction</Filter>
+    </FxCompile>
+    <FxCompile Include="example\shader\Destruction_ps.hlsl">
+      <Filter>example\shader\Destruction</Filter>
+    </FxCompile>
+    <FxCompile Include="example\shader\Destruction_vs.hlsl">
+      <Filter>example\shader\Destruction</Filter>
+    </FxCompile>
+    <FxCompile Include="example\shader\Destruction_ds.hlsl">
+      <Filter>example\shader\Destruction</Filter>
+    </FxCompile>
+    <FxCompile Include="example\shader\Toon_ps.hlsl">
+      <Filter>example\shader\Toon</Filter>
+    </FxCompile>
+    <FxCompile Include="example\shader\Toon_vs.hlsl">
+      <Filter>example\shader\Toon</Filter>
+    </FxCompile>
+    <FxCompile Include="example\shader\WavePaint_ps.hlsl">
+      <Filter>example\shader\WavePaint</Filter>
+    </FxCompile>
+    <FxCompile Include="example\shader\WavePaint_vs.hlsl">
+      <Filter>example\shader\WavePaint</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WinMain.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Painter\Painter.cpp">
-      <Filter>Painter\module</Filter>
-    </ClCompile>
     <ClCompile Include="example\example.cpp">
       <Filter>example</Filter>
     </ClCompile>
+    <ClCompile Include="func\HighResolutionTimer.cpp">
+      <Filter>func</Filter>
+    </ClCompile>
     <ClCompile Include="func\CameraControl.cpp">
-      <Filter>Func</Filter>
+      <Filter>func</Filter>
+    </ClCompile>
+    <ClCompile Include="painter\Painter.cpp">
+      <Filter>painter</Filter>
+    </ClCompile>
+    <ClCompile Include="painter\SpritePainter.cpp">
+      <Filter>painter</Filter>
+    </ClCompile>
+    <ClCompile Include="test000.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="WinMain.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="packages\ImGui.Docking.1.88.1\build\native\backends\imgui_impl_win32.cpp">
       <Filter>external</Filter>
@@ -88,53 +100,59 @@
     <ClCompile Include="packages\ImGui.Docking.1.88.1\build\native\backends\imgui_impl_dx11.cpp">
       <Filter>external</Filter>
     </ClCompile>
-    <ClCompile Include="test000.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="packages\ImGui.Docking.1.88.1\build\native\misc\cpp\imgui_stdlib.cpp">
       <Filter>external</Filter>
     </ClCompile>
-    <ClCompile Include="func\HighResolutionTimer.cpp">
-      <Filter>Func</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="example\WavePaint_vs.hlsl">
-      <Filter>example\shader\WavePaint</Filter>
-    </FxCompile>
-    <FxCompile Include="example\WavePaint_ps.hlsl">
-      <Filter>example\shader\WavePaint</Filter>
-    </FxCompile>
-    <FxCompile Include="example\Destruction_vs.hlsl">
-      <Filter>example\shader\Destruction</Filter>
-    </FxCompile>
-    <FxCompile Include="example\Destruction_ps.hlsl">
-      <Filter>example\shader\Destruction</Filter>
-    </FxCompile>
-    <FxCompile Include="example\Destruction_hs.hlsl">
-      <Filter>example\shader\Destruction</Filter>
-    </FxCompile>
-    <FxCompile Include="example\Destruction_ds.hlsl">
-      <Filter>example\shader\Destruction</Filter>
-    </FxCompile>
-    <FxCompile Include="example\Destruction_gs.hlsl">
-      <Filter>example\shader\Destruction</Filter>
-    </FxCompile>
-    <FxCompile Include="example\Toon_vs.hlsl">
-      <Filter>example\shader\Toon</Filter>
-    </FxCompile>
-    <FxCompile Include="example\Toon_ps.hlsl">
-      <Filter>example\shader\Toon</Filter>
-    </FxCompile>
+    <ClInclude Include="example\example.h">
+      <Filter>example</Filter>
+    </ClInclude>
+    <ClInclude Include="func\CerealIO.h">
+      <Filter>func</Filter>
+    </ClInclude>
+    <ClInclude Include="func\DX11System.h">
+      <Filter>func</Filter>
+    </ClInclude>
+    <ClInclude Include="func\FrameworkConfig.h">
+      <Filter>func</Filter>
+    </ClInclude>
+    <ClInclude Include="func\HighResolutionTimer.h">
+      <Filter>func</Filter>
+    </ClInclude>
+    <ClInclude Include="func\KeyInput.h">
+      <Filter>func</Filter>
+    </ClInclude>
+    <ClInclude Include="func\Misc.h">
+      <Filter>func</Filter>
+    </ClInclude>
+    <ClInclude Include="func\Arithmetic.h">
+      <Filter>func</Filter>
+    </ClInclude>
+    <ClInclude Include="func\CameraControl.h">
+      <Filter>func</Filter>
+    </ClInclude>
+    <ClInclude Include="painter\Painter.h">
+      <Filter>painter</Filter>
+    </ClInclude>
+    <ClInclude Include="painter\SpritePainter.h">
+      <Filter>painter</Filter>
+    </ClInclude>
+    <ClInclude Include="painter\CachedComObjects.h">
+      <Filter>painter\module</Filter>
+    </ClInclude>
+    <ClInclude Include="include.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="example\Destruction.hlsli">
+    <None Include="example\shader\Destruction.hlsli">
       <Filter>example\shader\Destruction</Filter>
     </None>
-    <None Include="packages.config" />
-    <None Include="example\Toon.hlsli">
+    <None Include="example\shader\Toon.hlsli">
       <Filter>example\shader\Toon</Filter>
     </None>
     <None Include=".editorconfig" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

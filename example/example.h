@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "../Painter/Painter.h"
+#include "../painter/Painter.h"
 #include <cereal/cereal.hpp>
 
 class WavePainter :public Painter

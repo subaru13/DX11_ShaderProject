@@ -174,16 +174,15 @@ public:
 
 class Painter : public PipelineState
 {
+private:
+	std::stack<CachedHandle> cachedHandles;
 public:
 	Painter(ID3D11Device* device) :PipelineState(device) {}
 	virtual ~Painter() = default;
 	virtual void drawBegin(ID3D11DeviceContext* immediateContext);
 	virtual void drawEnd(ID3D11DeviceContext* immediateContext);
-private:
-	std::stack<CachedHandle> cachedHandles;
-protected:
-	virtual void pushState(ID3D11DeviceContext* immediateContext)final;
-	virtual void popState(ID3D11DeviceContext* immediateContext)final;
+	virtual void pushStates(ID3D11DeviceContext* immediateContext)final;
+	virtual void popStates(ID3D11DeviceContext* immediateContext)final;
 };
 
 void makeCube(ID3D11Device* device, Geometry* cube);
@@ -195,6 +194,7 @@ HRESULT loadDomainShader(ID3D11Device* device, DomainShader* outDs, const char* 
 HRESULT loadHullShader(ID3D11Device* device, HullShader* outHs, const char* path);
 HRESULT loadGeometryShader(ID3D11Device* device, GeometryShader* outGs, const char* path);
 HRESULT loadShaderResource(ID3D11Device* device, ShaderResource* outSr, const wchar_t* path);
+HRESULT createShaderResource(ID3D11Device* device, ShaderResource* outSr);
 HRESULT createStructuredBuffer(ID3D11Device* device, StructuredBuffer* outSb, UINT elementSize, UINT count, void* initData = 0);
 HRESULT createConstantBuffer(ID3D11Device* device, ConstantBuffer* outCb, UINT elementSize, void* initData = 0);
 HRESULT createRenderTextrue(ID3D11Device* device, RenderTexture* outRt, UINT width, UINT height, DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM);

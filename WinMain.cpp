@@ -56,6 +56,7 @@ int WINAPI WinMain(
 			KeyManager::instance()->update();
 			Mouse::instance()->update(dx11System->hwnd);
 			dx11System->clearRenderTargets(nullptr);
+			dx11System->setRenderTargets();
 			update((float)highResolutionTimer.GetElapsedTime());
 			draw(dx11System);
 			showLog();
